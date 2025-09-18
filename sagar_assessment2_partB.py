@@ -1,112 +1,146 @@
-# Start with a global requisition counter
-REQUISITION_COUNTER = 1000   # This number will increase each time we create a requisition
 
+# GLOBAL COUNTER
+# Keeps track of unique requisition IDs
+#Principle: K.I.S.S – Keep It Simple, Stupid
+#Focus on making code straightforward and easy to understand.
+#Avoid unnecessary complexity so that anyone reading or maintaining it can quickly grasp what’s happening.
+#Simple solutions are usually more reliable and easier to manage in the long run.
+REQUISITION_COUNTER = 1000
 
-# Define the class RequisitionSystem
+# REQUISITION SYSTEM CLASS
+# Defines all requisition attributes and methods
+# Principles:
+#Single Responsibility – Each class should focus on one thing. This keeps the code clean and easier to maintain.
+#Open / Closed – code should be open for adding new features but closed for modifying existing ones.
 class RequisitionSystem:
+    all_requisitions = []  # Stores all requisitions for tracking and statistics
 
-    all_requisitions = [] # Class variable: stores all requisitions created
-
-    # Constructor method: called when a new requisition object is created
+# NEW REQUISITION
+# Initializes a new requisition with default values
+# Adds it to the list of all requisitions
+#Principles:
+#Single Responsibility – Each class or function should do only one thing. keeping the code focused and easier to maintain.
+#D.R.Y– To Avoid duplicating logic. By centralizing ID creation in one place.
     def __init__(self):
-        global REQUISITION_COUNTER # Tell Python we are using the global variable
-        REQUISITION_COUNTER += 1  # Increase the global counter by 1
-        self.requisition_id = REQUISITION_COUNTER  # Assign a unique requisition ID
-        self.date = ""   # Placeholder for requisition date (empty for now)
-        self.staff_id = ""   # Placeholder for staff ID (empty for now)
-        self.staff_name = ""  # Placeholder for staff name (empty for now)
-        self.total = 0   # Start total amount at 0
-        self.status = "Pending" # Default status is "Pending"
-        self.approval_reference_number = "Not available" # Approval reference is empty for now
-        RequisitionSystem.all_requisitions.append(self)  # Save this requisition into the list of all requisitions
+        global REQUISITION_COUNTER
+        REQUISITION_COUNTER += 1
+        self.requisition_id = REQUISITION_COUNTER
+        self.date = ""
+        self.staff_id = ""
+        self.staff_name = ""
+        self.total = 0
+        self.status = "Pending"
+        self.approval_reference_number = "Not available"
+        RequisitionSystem.all_requisitions.append(self)
 
-    # Method for staff to enter information
+
+    # STAFF INFORMATION
+    # Collects staff details: date, staff ID, and name
+    # Principles:
+    # SRP: This method only collects staff details. Input logic isn’t mixed with calculations or approvals.
+    # K.I.S.S: Simple input prompts make it easy to understand and use.
     def staff_info(self):
-        self.date = input("Enter the Date Of Requisition: ")  # Ask user to type the date
-        self.staff_id = input("Enter Unique Staff ID: ")   # Ask user to type staff ID
-        self.staff_name = input("Enter Staff Name: ")   # Ask user to type staff name
+        self.date = input("Enter the Date Of Requisition: ")
+        self.staff_id = input("Enter Unique Staff ID: ")
+        self.staff_name = input("Enter Staff Name: ")
 
-    # Method for entering requisition details (prices of items)
+
+    # REQUISITION DETAILS
+    # Collects item prices and calculates total
+    # Principles:
+    # SRP: Handles only item prices and computes the total; no approval or display logic.
+    # K.I.S.S: Simple loop for input collection, easy to follow.
+    # D.R.Y: Uses one loop to collect all item prices instead of repeating input logic multiple times.
     def requisitions_details(self):
-        total = 0    # Start local total at 0
-        while True:    # Keep asking until user types "done"
-            price = input("Enter item price and when you are done type 'done': $ ")  # Ask user to enter price
-            if price.lower() == "done": # If user types "done" (any case like Done/DONE)
-                break   # Stop asking for prices
-            try:   # Try to convert input to a number
-                total += float(price)   # Add the number to total if valid
-            except: # If conversion fails
-                print("Invalid format. Please type a number.")  # Show error message
-        self.total = total  # Save the total amount to this requisition
+        total = 0
+        while True:
+            price = input("Enter item price (or 'done'): $ ")
+            if price.lower() == "done":
+                break
+            try:
+                total += float(price)
+            except:
+                print("Invalid number.")
+        self.total = total
 
-    # Method for auto-approval check
+
+    # AUTO-APPROVAL
+    # Automatically approves requisitions with total < 500
+    # Generates approval reference number if approved
+    #Principles:
+    #SRP: Only handles automatic approval logic.
+    #Open / Closed: Approval rules can be changed or extended without affecting other parts of the class.
     def requisition_approval(self):
-        if self.total < 500:  # If total cost is less than 500
-            self.status = "Approved" # Approve automatically
-            # Generate approval reference number = staff ID + last 3 digits of requisition ID
+        if self.total < 500:
+            self.status = "Approved"
             self.approval_reference_number = f"{self.staff_id}{str(self.requisition_id)[-3:]}"
-        else:   # If total is 500 or more
-            self.status = "Pending"  # Keep it pending for manager decision
+        else:
+            self.status = "Pending"
 
-    # Method for manager to respond to pending requisitions
+
+    # MANAGER RESPONSE
+    # Manager approves or rejects pending requisitions
+    # Updates status and approval reference
+    #Principles:
+    #SRP: Handles only manager decision-making.
+    #K.I.S.S: Simple yes/no logic keeps it readable.
+
     def respond_requisition(self):
-        if self.status == "Pending":  # Only if requisition is still pending
-            decision = input("Manager: Approve this requisition? yes or no: ")  # Ask manager to decide
-            if decision.lower() == "yes": # If manager types "yes"
-                self.status = "Approved"  # Change status to Approved
-                # Generate approval reference number
+        if self.status == "Pending":
+            decision = input("Manager: Approve? yes/no: ")
+            if decision.lower() == "yes":
+                self.status = "Approved"
                 self.approval_reference_number = f"{self.staff_id}{str(self.requisition_id)[-3:]}"
-            elif decision.lower() == "no":    # If manager types "no"
-                self.status = "Not approved"  # Change status to Not approved
-            else:  # If manager types anything else
-                print("Wrong format.")  # Show error message
-        else: # If requisition is already approved or rejected
-            print("This requisition is already " + self.status)  # Print current status
+            elif decision.lower() == "no":
+                self.status = "Not approved"
+            else:
+                print("Wrong input.")
+        else:
+            print("Already " + self.status)
 
-    # Method to display requisition details
+
+    # DISPLAY REQUISITION
+    # Displays all details of a single requisition
+    #Principles:
+    #SRP: Only responsible for displaying requisition information.
+    #Clean Code > Clever Code: Uses simple print statements rather than complex formatting or unnecessary logic.
     def display_requisition(self):
-        print(f"Requisition ID: {self.requisition_id}")   # Show requisition ID
-        print(f"Date: {self.date}")  # Show date of requisition
-        print(f"Staff: {self.staff_name} ({self.staff_id})")  # Show staff name and ID
-        print(f"Total: ${self.total}")  # Show total cost
-        print(f"Status: {self.status}")  # Show status (Approved/Pending/Not approved)
-        print(f"Approval Ref: {self.approval_reference_number}")  # Show approval reference number
+        print(f"ID: {self.requisition_id}, Date: {self.date}, Staff: {self.staff_name} ({self.staff_id})")
+        print(f"Total: ${self.total}, Status: {self.status}, Approval Ref: {self.approval_reference_number}")
 
-    # Method to display overall statistics of all requisitions
+
+    # REQUISITION STATISTICS
+    # Shows summary of all requisitions: total, approved, pending, not approved
+    #Principles:
+    #SRP: Only calculates and displays statistics.
+    #D.R.Y: Uses a single loop to count all statuses instead of repeating similar logic for each type.
     def requisition_statistics(self):
-        total_submitted = len(RequisitionSystem.all_requisitions)  # Count how many requisitions have been made
-        approved = 0   # Counter for approved requisitions
-        pending = 0    # Counter for pending requisitions
-        not_approved = 0   # Counter for not approved requisitions
-
-        # Loop through all requisitions in the list
+        total_submitted = len(RequisitionSystem.all_requisitions)
+        approved = pending = not_approved = 0
         for req in RequisitionSystem.all_requisitions:
-            if req.status == "Approved":  # If requisition status is Approved
-                approved += 1             # Increase approved counter
-            elif req.status == "Pending":  # If requisition status is Pending
-                pending += 1     # Increase pending counter
-            elif req.status == "Not approved":  # If requisition status is Not approved
-                not_approved += 1   # Increase not approved counter
+            if req.status == "Approved":
+                approved += 1
+            elif req.status == "Pending":
+                pending += 1
+            elif req.status == "Not approved":
+                not_approved += 1
+        print(f"\nTotal: {total_submitted}, Approved: {approved}, Pending: {pending}, Not Approved: {not_approved}")
 
-        # Print statistics
-        print("\n Requisition Statistics")  # Heading
-        print(f"Total requisition submitted: {total_submitted}")  # Total number
-        print(f"Requisition Approved: {approved}")   # Number approved
-        print(f"Requisition Pending: {pending}")    # Number pending
-        print(f"Requisition Not Approved: {not_approved}")   # Number not approved
-        
 
-# This block runs only if the program is run directly (not imported as a module)
+# MAIN PROGRAM
+# Controls workflow: create requisitions, collect info, approve, display, and show statistics
+#Principles:
+#Composition > Inheritance: The main workflow uses instances of RequisitionSystem instead of inheriting from it, keeping design simple.
+#K.I.S.S: The workflow is clear—create requisitions, collect info, approve, display, and show statistics.
+#Open / Closed: The main program can be extended (e.g., add logging or export) without modifying the class logic.
 if __name__ == "__main__":
-    num_reqs = int(input("How many requisitions do you want to enter? "))  # Ask user how many requisitions
-
-    # Loop through the number of requisitions the user wants
+    num_reqs = int(input("How many requisitions? "))
     for i in range(num_reqs):
-        req = RequisitionSystem()   # Create a new requisition object
-        print(f"\nRequisition {i+1}")   # Print requisition number for clarity
-        req.staff_info()     # Ask for staff details
-        req.requisitions_details()   # Ask for item prices
-        req.requisition_approval()   # Check auto approval if under 500
-        req.respond_requisition()    # Manager decides if still pending
-        req.display_requisition()    # Show requisition details
-        req.requisition_statistics()  # Show overall statistics
+        req = RequisitionSystem()
+        print(f"\nRequisition {i+1}")
+        req.staff_info()             # Staff info
+        req.requisitions_details()   # Item prices
+        req.requisition_approval()   # Auto-approval
+        req.respond_requisition()    # Manager decision
+        req.display_requisition()    # Display details
+        req.requisition_statistics() # Show summary
