@@ -42,5 +42,5 @@ In case of a small total, the system approves the requisition automatically and 
 When the total exceeds, the manager will be in a position to accept or decline it.
 The orders of the requisition and the general statistics are presented, which assist the organisation in managing the spending and approvals effectively.
 
-	This discussion gives a clear insight into what the code does, how it works and where it can be applied without showing any real code lines.
+This discussion gives a clear insight into what the code does, how it works and where it can be applied.
 
