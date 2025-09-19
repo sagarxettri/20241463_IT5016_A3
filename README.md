@@ -42,5 +42,14 @@ In case of a small total, the system approves the requisition automatically and 
 When the total exceeds, the manager will be in a position to accept or decline it.
 The orders of the requisition and the general statistics are presented, which assist the organisation in managing the spending and approvals effectively.
 
+
+
+Although the Requisition System is good, it has certain limitations:
+Manual Data Entry: It requires the staff members to input the costs and details of the items manually, and human error may be introduced.
+Threshold Dependency: Auto-approval utilises fixed limits, which can be easily altered when an organisation changes its budgets.
+None of the Real-Time Database Integration: The system is currently in-memory, which prevents persistence and multi-user access.
+Limited Reporting: Advanced analytics reports or graphical reports are not available and would require further development.
+Lack of Audit Trail on Change: Requisitions once submitted are not completely trailed, minimising accountability of changes.
+
 This discussion gives a clear insight into what the code does, how it works and where it can be applied.
 
